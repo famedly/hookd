@@ -1,0 +1,26 @@
+[package]
+name = "hookd"
+version = "0.1.0"
+authors = ["Jan Christian Grünhage <jan.christian@gruenhage.xyz>"]
+edition = "2018"
+description = "A simple webhook daemon that supports multiple hooks, passing env vars and reading stdout/stderr."
+readme = "README.md"
+repository = "https://gitlab.com/famedly/devops/services/hookd"
+license = "AGPL-3.0-only"
+keywords = ["webhook"]
+
+[dependencies]
+actix-http = "3.0.0-beta.6"
+actix-web = "4.0.0-beta.6"
+anyhow = "1"
+chrono = { version = "0.4", features = ["serde"] }
+directories-next = "2"
+fern = "0.6"
+log = { version = "0.4", features = ["serde"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.8"
+substring = "1"
+thiserror = "1"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "process", "fs"] }
+uuid = { version = "0.8", features = ["serde", "v4"], default-features = false }

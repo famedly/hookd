@@ -1,0 +1,227 @@
+---
+openapi: 3.0.2
+info:
+  title: Famedly hookd
+  version: 1.0.0
+paths:
+  /hook/{name}:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateConfig'
+        required: true
+      responses:
+        "200":
+          description: UUID of the running hook
+    parameters:
+    - name: name
+      description: Name of the hook to be triggered.
+      schema:
+        type: string
+      in: path
+      required: true
+  /status/{id}:
+    summary: Reads the status of an instance
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+          description: Information about the hook instance
+    parameters:
+    - examples:
+        UUID:
+          value: '"89462579-eb68-401f-b597-61ca7a74f44a"'
+      name: id
+      description: ID of the instance to check the status for
+      schema:
+        type: string
+      in: path
+      required: true
+  /status/{id}/stdout:
+    get:
+      responses:
+        "200":
+          content:
+            text/plain:
+              schema:
+                type: string
+          description: stdout of the requested instance
+    parameters:
+    - name: id
+      description: ID of the instance to check the status for
+      in: path
+      required: true
+  /status/{id}/stderr:
+    get:
+      responses:
+        "200":
+          content:
+            text/plain:
+              schema:
+                type: string
+          description: stdout of the requested instance
+    parameters:
+    - name: id
+      description: ID of the instance to check the status for
+      in: path
+      required: true
+components:
+  schemas:
+    CreateConfig:
+      title: Root Type for Creation
+      description: ""
+      required:
+      - vars
+      type: object
+      properties:
+        vars:
+          description: Map of env vars that are supposed to be set on the hook process
+          properties:
+            NAME:
+              type: string
+            HEIGHT:
+              type: string
+      example:
+        vars:
+          NAME: Franklin
+          HEIGHT: 183cm
+    Request:
+      title: Root Type for Request
+      description: Request parameters of a hook instance spawning request
+      type: object
+      properties:
+        uri:
+          type: string
+        method:
+          type: string
+        version:
+          type: string
+        headers:
+          type: object
+          properties:
+            content-type:
+              type: string
+            host:
+              type: string
+            accept:
+              type: string
+            user-agent:
+              type: string
+            content-length:
+              type: string
+        peer_addr:
+          type: string
+      example:
+        uri: /hook/ls
+        method: POST
+        version: HTTP/1.1
+        headers:
+          content-type: application/json
+          host: localhost:8080
+          accept: '*/*'
+          user-agent: curl/7.77.0
+          content-length: "11"
+        peer_addr: 127.0.0.1:40398
+    Info:
+      title: Root Type for Info
+      description: Information about a hook instance
+      required:
+      - request
+      - config
+      - running
+      - started
+      type: object
+      properties:
+        request:
+          $ref: '#/components/schemas/Request'
+          description: Description of the request that was used to create this instance
+          properties:
+            uri:
+              type: string
+            method:
+              type: string
+            version:
+              type: string
+            headers:
+              type: object
+              properties:
+                content-type:
+                  type: string
+                host:
+                  type: string
+                accept:
+                  type: string
+                user-agent:
+                  type: string
+                content-length:
+                  type: string
+            peer_addr:
+              type: string
+        config:
+          $ref: '#/components/schemas/Config'
+          description: Configuration of the hook
+          properties:
+            command:
+              type: string
+            work_dir:
+              type: string
+            allowed_keys:
+              type: array
+              items: {}
+        running:
+          description: Whether the instance is still running
+          type: boolean
+        started:
+          format: date-time
+          description: Time when the instance was started
+          type: string
+        finished:
+          format: date-time
+          description: "Present if the hook instance has finished, is set to the time\
+            \ when it finished"
+          type: string
+        success:
+          description: Whether the instance succeeded. Is present once the hook has
+            finished.
+          type: boolean
+      example:
+        request:
+          uri: /hook/ls
+          method: POST
+          version: HTTP/1.1
+          headers:
+            content-type: application/json
+            host: localhost:8080
+            accept: '*/*'
+            user-agent: curl/7.77.0
+            content-length: "11"
+          peer_addr: 127.0.0.1:40398
+        config:
+          command: /home/jcgruenhage/dev/famedly/services/hookd/test.sh
+          work_dir: /home/jcgruenhage/dev/famedly
+          allowed_keys: []
+        running: true
+        started: 2021-06-01T19:38:38.990236243Z
+        finished: 2021-06-01T19:38:38.990236243Z
+        success: true
+    Config:
+      title: Root Type for Config
+      description: Config for a hook
+      type: object
+      properties:
+        command:
+          type: string
+        work_dir:
+          type: string
+        allowed_keys:
+          type: array
+          items: {}
+      example:
+        command: /path/to/some-webhook-command
+        work_dir: /some/directory
+        allowed_keys: []

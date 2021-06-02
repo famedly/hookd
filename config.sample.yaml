@@ -1,0 +1,9 @@
+address: 127.0.0.1:8080
+log_level: warn
+hooks: 
+  ls:
+    command: "/usr/local/bin/sample-hook-executable"
+    work_dir: "/home/hookd"
+    allowed_keys:
+      - "SOME_HOOK_VAR"
+      - "SOME_OTHER_VAR"
