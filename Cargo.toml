@@ -1,6 +1,6 @@
 [package]
 name = "hookd"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Jan Christian Grünhage <jan.christian@gruenhage.xyz>"]
 edition = "2018"
 description = "A simple webhook daemon that supports multiple hooks, passing env vars and reading stdout/stderr."
