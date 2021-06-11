@@ -16,7 +16,7 @@ impl From<ApiError> for HttpResponse {
     fn from(e: ApiError) -> Self {
         match e {
             ApiError::InternalServerError(e) => {
-                log::error!("Couldn't handle request! See: {}", e);
+                log::error!("Couldn't handle request! See: {}, caused by {}", e, e.root_cause());
                 HttpResponse::InternalServerError().into()
             }
             ApiError::NotFound(e) => {
