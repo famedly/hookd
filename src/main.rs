@@ -18,7 +18,6 @@ pub mod file;
 pub mod logging;
 pub mod model;
 
-
 /// Main function that sets up logging and starts the API server.
 #[actix_web::main]
 async fn main() -> Result<()> {

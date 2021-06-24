@@ -55,22 +55,44 @@ pub async fn run_hook(
 ///
 /// This includes capturing the output streams and writing them to files, as well as waiting for
 /// the child process to exit and writing whether it succeeded and when it finished to the info file
-pub async fn handle_instance(mut instance: Child, log_path: PathBuf, info_path: PathBuf, id: Uuid) -> Result<(), ApiError> {
+pub async fn handle_instance(
+    mut instance: Child,
+    log_path: PathBuf,
+    info_path: PathBuf,
+    id: Uuid,
+) -> Result<(), ApiError> {
     let mut stdout_path = log_path.clone();
     stdout_path.push("stdout.txt");
     let mut stderr_path = log_path.clone();
     stderr_path.push("stderr.txt");
-    let stdout = instance.stdout.take().context(format!("Couldn't take stdout of instance {}", id))?;
-    let stderr = instance.stderr.take().context(format!("Couldn't take stderr of instance {}", id))?;
+    let stdout = instance
+        .stdout
+        .take()
+        .context(format!("Couldn't take stdout of instance {}", id))?;
+    let stderr = instance
+        .stderr
+        .take()
+        .context(format!("Couldn't take stderr of instance {}", id))?;
     tokio::spawn(write_stream_to_file(stdout, stdout_path));
     tokio::spawn(write_stream_to_file(stderr, stderr_path));
-    tokio::spawn(update_hook_info_upon_completion(instance, info_path, id.clone()));
+    tokio::spawn(update_hook_info_upon_completion(
+        instance,
+        info_path,
+        id.clone(),
+    ));
     Ok(())
 }
 
 /// Updates the info file for a hook after the instance completed
-pub async fn update_hook_info_upon_completion(mut instance: Child, hook_info_path: PathBuf, id: Uuid) -> Result<(), ApiError> {
-    let status = instance.wait().await.context(format!("Couldn't wait for child process to exist for instance {}", id))?;
+pub async fn update_hook_info_upon_completion(
+    mut instance: Child,
+    hook_info_path: PathBuf,
+    id: Uuid,
+) -> Result<(), ApiError> {
+    let status = instance.wait().await.context(format!(
+        "Couldn't wait for child process to exist for instance {}",
+        id
+    ))?;
     let now = Utc::now();
 
     let mut info_file = OpenOptions::new()
@@ -81,13 +103,21 @@ pub async fn update_hook_info_upon_completion(mut instance: Child, hook_info_pat
         .await
         .context(format!("Couldn't open info file for instance {}", id))?;
     let mut info = String::new();
-    info_file.read_to_string(&mut info).await.context(format!("Couldn't read info file for instance {}", id))?;
-    let mut info: Info = serde_json::from_str(&info).context(format!("Couldn't parse json info for instance {}", id))?;
+    info_file
+        .read_to_string(&mut info)
+        .await
+        .context(format!("Couldn't read info file for instance {}", id))?;
+    let mut info: Info = serde_json::from_str(&info)
+        .context(format!("Couldn't parse json info for instance {}", id))?;
     info.running = false;
     info.success = Some(status.success());
     info.finished = Some(now);
-    let info = serde_json::to_string_pretty(&info).context(format!("Couldn't serialize json info for instance {}", id))?;
-    info_file.seek(SeekFrom::Start(0)).await.context(format!("Couldn't seek to start of info file for instance {}", id))?;
+    let info = serde_json::to_string_pretty(&info)
+        .context(format!("Couldn't serialize json info for instance {}", id))?;
+    info_file.seek(SeekFrom::Start(0)).await.context(format!(
+        "Couldn't seek to start of info file for instance {}",
+        id
+    ))?;
     info_file
         .write_all(&info.bytes().collect::<Vec<u8>>())
         .await

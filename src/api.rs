@@ -11,7 +11,7 @@ use crate::{
     model::CreateConfig,
 };
 
-/// Tries to read the hook status 
+/// Tries to read the hook status
 pub async fn hook_status(id: web::Path<Uuid>, dirs: web::Data<ProjectDirs>) -> HttpResponse {
     match read_status(&id, &dirs).await {
         Ok(info) => HttpResponse::Ok().json(info),
@@ -19,7 +19,7 @@ pub async fn hook_status(id: web::Path<Uuid>, dirs: web::Data<ProjectDirs>) -> H
     }
 }
 
-/// Tries to read the hook stdout 
+/// Tries to read the hook stdout
 pub async fn hook_stdout(id: web::Path<Uuid>, dirs: web::Data<ProjectDirs>) -> HttpResponse {
     match read_log("stdout", &id, &dirs).await {
         Ok(stdout) => HttpResponse::Ok().content_type("text/plain").body(stdout),
@@ -27,7 +27,7 @@ pub async fn hook_stdout(id: web::Path<Uuid>, dirs: web::Data<ProjectDirs>) -> H
     }
 }
 
-/// Tries to read the hook stderr 
+/// Tries to read the hook stderr
 pub async fn hook_stderr(id: web::Path<Uuid>, dirs: web::Data<ProjectDirs>) -> HttpResponse {
     match read_log("stderr", &id, &dirs).await {
         Ok(stderr) => HttpResponse::Ok().content_type("text/plain").body(stderr),

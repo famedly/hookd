@@ -24,7 +24,9 @@ pub async fn read_log(stream: &str, id: &Uuid, dirs: &ProjectDirs) -> Result<Str
         log_path.clone(),
         "Hook with the matching ID exists, but log doesn't exist",
     )?;
-    let stream = read_to_string(log_path).await.context(format!("Couldn't read {} for instance {}", stream, id))?;
+    let stream = read_to_string(log_path)
+        .await
+        .context(format!("Couldn't read {} for instance {}", stream, id))?;
     Ok(stream)
 }
 
@@ -35,7 +37,8 @@ pub async fn read_status(id: &Uuid, dirs: &ProjectDirs) -> Result<Info, ApiError
     let info_string = read_to_string(info_path)
         .await
         .context("Couldn't read hook info")?;
-    let info: Info = serde_json::from_str(&info_string).context(format!("Couldn't parse json info for instance {}", id))?;
+    let info: Info = serde_json::from_str(&info_string)
+        .context(format!("Couldn't parse json info for instance {}", id))?;
     Ok(info)
 }
 
@@ -83,13 +86,23 @@ pub async fn write_stream_to_file<T>(mut stream: T, path: PathBuf) -> Result<(),
 where
     T: AsyncRead + Send + Unpin,
 {
-    let mut file = File::create(path.clone()).await.context(format!("Couldn't create log file {}", path.to_string_lossy()))?;
-    copy(&mut stream, &mut file).await.context(format!("Couldn't write output to log file {}", path.to_string_lossy()))?;
+    let mut file = File::create(path.clone()).await.context(format!(
+        "Couldn't create log file {}",
+        path.to_string_lossy()
+    ))?;
+    copy(&mut stream, &mut file).await.context(format!(
+        "Couldn't write output to log file {}",
+        path.to_string_lossy()
+    ))?;
     Ok(())
 }
 
 /// Helper fuction that writes the hook info after the hook has been spawned
-pub async fn write_initial_hook_info(hook: &Hook, req: HttpRequest, file: PathBuf) -> Result<(), ApiError> {
+pub async fn write_initial_hook_info(
+    hook: &Hook,
+    req: HttpRequest,
+    file: PathBuf,
+) -> Result<(), ApiError> {
     let started = Utc::now();
     let info = Info {
         request: req.head().into(),
