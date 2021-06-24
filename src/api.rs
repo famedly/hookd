@@ -46,7 +46,9 @@ pub async fn start_hook(
     let name = path.into_inner();
     let create_config = create_config.0.clone();
     match run_hook(&config, req, &dirs, create_config, name).await {
-        Ok(id) => HttpResponse::Ok().body(id.to_hyphenated().to_string()),
+        Ok(id) => HttpResponse::Ok()
+            .content_type("text/plain")
+            .body(id.to_hyphenated().to_string()),
         Err(e) => e.into(),
     }
 }
