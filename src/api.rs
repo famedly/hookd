@@ -29,8 +29,8 @@ pub async fn hook_stdout(id: web::Path<Uuid>, dirs: web::Data<ProjectDirs>) -> H
 
 /// Tries to read the hook stderr 
 pub async fn hook_stderr(id: web::Path<Uuid>, dirs: web::Data<ProjectDirs>) -> HttpResponse {
-    match read_log("stdout", &id, &dirs).await {
-        Ok(stdout) => HttpResponse::Ok().content_type("text/plain").body(stdout),
+    match read_log("stderr", &id, &dirs).await {
+        Ok(stderr) => HttpResponse::Ok().content_type("text/plain").body(stderr),
         Err(e) => e.into(),
     }
 }

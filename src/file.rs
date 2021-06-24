@@ -24,8 +24,8 @@ pub async fn read_log(stream: &str, id: &Uuid, dirs: &ProjectDirs) -> Result<Str
         log_path.clone(),
         "Hook with the matching ID exists, but log doesn't exist",
     )?;
-    let stdout = read_to_string(log_path).await.context(format!("Couldn't read {} for instance {}", stream, id))?;
-    Ok(stdout)
+    let stream = read_to_string(log_path).await.context(format!("Couldn't read {} for instance {}", stream, id))?;
+    Ok(stream)
 }
 
 /// Reads the current hook status
