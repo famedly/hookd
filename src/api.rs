@@ -11,6 +11,11 @@ use crate::{
     model::CreateConfig,
 };
 
+/// Always returns 200 OK, for health checking by proxies
+pub async fn health_check() -> HttpResponse {
+    HttpResponse::Ok().finish()
+}
+
 /// Tries to read the hook status
 pub async fn hook_status(id: web::Path<Uuid>, dirs: web::Data<ProjectDirs>) -> HttpResponse {
     match read_status(&id, &dirs).await {

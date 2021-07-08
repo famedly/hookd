@@ -5,7 +5,7 @@
 
 use actix_web::{web, App, HttpServer};
 use anyhow::{Context, Result};
-use api::{hook_status, hook_stderr, hook_stdout, start_hook};
+use api::{health_check, hook_status, hook_stderr, hook_stdout, start_hook};
 use directories_next::ProjectDirs;
 
 pub use error::ApiError;
@@ -31,6 +31,7 @@ async fn main() -> Result<()> {
         App::new()
             .app_data(config_data.clone())
             .app_data(dirs_data.clone())
+            .route("/health", web::get().to(health_check))
             .route("/hook/{name}", web::post().to(start_hook))
             .route("/status/{id}", web::get().to(hook_status))
             .route("/status/{id}/stdout", web::get().to(hook_stdout))
