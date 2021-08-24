@@ -1,9 +1,11 @@
 include:
   - project: 'famedly/company/devops/templates/ci-cd'
-    ref: main
-    file:
-      - '/rust.yml'
-      - '/docker.yml'
+    ref: rust-v1
+    file: '/rust.yml'
+  - project: 'famedly/company/devops/templates/ci-cd'
+    ref: 'docker-v1'
+    file: '/docker.yml'
+
 
 stages:
   - test
