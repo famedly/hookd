@@ -1,7 +1,6 @@
 //! Module that provides methods for handling file I/O related to running hooks
 use std::path::PathBuf;
 
-use actix_web::HttpRequest;
 use anyhow::Context;
 use chrono::Utc;
 use directories_next::ProjectDirs;
@@ -13,11 +12,15 @@ use tokio::{
 };
 use uuid::Uuid;
 
-use crate::{config::Hook, error::ApiError, model::Info};
+use crate::{
+    config::Hook,
+    error::ApiError,
+    model::{Info, Request},
+};
 
 /// Reads the stdout or stderr stream of a hook instance
 pub async fn read_log(stream: &str, id: &Uuid, dirs: &ProjectDirs) -> Result<String, ApiError> {
-    let (_, mut log_path) = get_hook_files(&dirs, &id, false).await?;
+    let (_, mut log_path) = get_hook_files(dirs, id, false).await?;
     ensure_file_exists(log_path.clone(), "No hook with the matching ID was found")?;
     log_path.push(format!("{}.txt", stream));
     ensure_file_exists(
@@ -32,7 +35,7 @@ pub async fn read_log(stream: &str, id: &Uuid, dirs: &ProjectDirs) -> Result<Str
 
 /// Reads the current hook status
 pub async fn read_status(id: &Uuid, dirs: &ProjectDirs) -> Result<Info, ApiError> {
-    let (info_path, _) = get_hook_files(&dirs, &id, false).await?;
+    let (info_path, _) = get_hook_files(dirs, id, false).await?;
     ensure_file_exists(info_path.clone(), "No hook with the matching ID was found")?;
     let info_string = read_to_string(info_path)
         .await
@@ -100,12 +103,12 @@ where
 /// Helper fuction that writes the hook info after the hook has been spawned
 pub async fn write_initial_hook_info(
     hook: &Hook,
-    req: HttpRequest,
+    request: Request,
     file: PathBuf,
 ) -> Result<(), ApiError> {
     let started = Utc::now();
     let info = Info {
-        request: req.head().into(),
+        request,
         config: hook.clone(),
         running: true,
         success: None,
