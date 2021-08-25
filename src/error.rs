@@ -10,6 +10,12 @@ pub enum ApiError {
     /// The resource requested does not exist
     #[error("Resource not found: {0}")]
     NotFound(&'static str),
+    /// The range requested can't be satisfied (e.g. range begins after end of file or not at a char boundary)
+    #[error("Range not satisfiable: {0}")]
+    RangeNotSatisfiable(&'static str),
+    /// The requested range is semantically wrong (e.g. range start is greater than range end)
+    #[error("Invalid range: {0}")]
+    InvalidRange(&'static str),
 }
 
 impl From<ApiError> for StatusCode {
@@ -26,6 +32,14 @@ impl From<ApiError> for StatusCode {
             ApiError::NotFound(e) => {
                 log::debug!("Resource not found! See: {}", e);
                 StatusCode::NOT_FOUND
+            }
+            ApiError::RangeNotSatisfiable(e) => {
+                log::debug!("Range not satisfiable! See: {}", e);
+                StatusCode::RANGE_NOT_SATISFIABLE
+            }
+            ApiError::InvalidRange(e) => {
+                log::debug!("Invalid range request! See: {}", e);
+                StatusCode::BAD_REQUEST
             }
         }
     }

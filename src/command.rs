@@ -67,11 +67,11 @@ pub async fn handle_instance(
     let stdout = instance
         .stdout
         .take()
-        .context(format!("Couldn't take stdout of instance {}", id))?;
+        .context(format!("Couldn't take stdout of instance {id}"))?;
     let stderr = instance
         .stderr
         .take()
-        .context(format!("Couldn't take stderr of instance {}", id))?;
+        .context(format!("Couldn't take stderr of instance {id}"))?;
     tokio::spawn(write_stream_to_file(stdout, stdout_path));
     tokio::spawn(write_stream_to_file(stderr, stderr_path));
     tokio::spawn(update_hook_info_upon_completion(instance, info_path, id));
@@ -85,8 +85,7 @@ pub async fn update_hook_info_upon_completion(
     id: Uuid,
 ) -> Result<(), ApiError> {
     let status = instance.wait().await.context(format!(
-        "Couldn't wait for child process to exist for instance {}",
-        id
+        "Couldn't wait for child process to exist for instance {id}"
     ))?;
     let now = Utc::now();
 
@@ -96,27 +95,26 @@ pub async fn update_hook_info_upon_completion(
         .create(false)
         .open(hook_info_path)
         .await
-        .context(format!("Couldn't open info file for instance {}", id))?;
+        .context(format!("Couldn't open info file for instance {id}"))?;
     let mut info = String::new();
     info_file
         .read_to_string(&mut info)
         .await
-        .context(format!("Couldn't read info file for instance {}", id))?;
+        .context(format!("Couldn't read info file for instance {id}"))?;
     let mut info: Info = serde_json::from_str(&info)
-        .context(format!("Couldn't parse json info for instance {}", id))?;
+        .context(format!("Couldn't parse json info for instance {id}"))?;
     info.running = false;
     info.success = Some(status.success());
     info.finished = Some(now);
     let info = serde_json::to_string_pretty(&info)
-        .context(format!("Couldn't serialize json info for instance {}", id))?;
+        .context(format!("Couldn't serialize json info for instance {id}"))?;
     info_file.seek(SeekFrom::Start(0)).await.context(format!(
-        "Couldn't seek to start of info file for instance {}",
-        id
+        "Couldn't seek to start of info file for instance {id}"
     ))?;
     info_file
         .write_all(&info.bytes().collect::<Vec<u8>>())
         .await
-        .context(format!("Couldn't write info file for instance {}", id))?;
+        .context(format!("Couldn't write info file for instance {id}"))?;
 
     Ok(())
 }

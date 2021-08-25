@@ -6,7 +6,7 @@
 use anyhow::{Context, Result};
 use api::{health_check, hook_status, hook_stderr, hook_stdout, start_hook};
 use axum::{
-    handler::{get, post},
+    routing::{get, post},
     AddExtensionLayer, Router,
 };
 use directories_next::ProjectDirs;

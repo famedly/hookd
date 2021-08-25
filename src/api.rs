@@ -1,7 +1,9 @@
 //! module with wrapper functions for actix handlers
+use anyhow::Result;
 use axum::{extract, Json};
 use directories_next::ProjectDirs;
-use http::StatusCode;
+use headers::{ContentRange, HeaderMapExt, Range};
+use http::{HeaderMap, StatusCode};
 use uuid::Uuid;
 
 use crate::{
@@ -27,26 +29,63 @@ pub async fn hook_status(
     }
 }
 
+/// Implementation for [`hook_stdout`] and [`hook_stderr`]
+async fn hook(
+    stream: &str,
+    id: extract::Path<Uuid>,
+    dirs: extract::Extension<ProjectDirs>,
+    range: Option<extract::TypedHeader<Range>>,
+) -> Result<(StatusCode, HeaderMap, String), StatusCode> {
+    let mut headers = HeaderMap::new();
+    headers.typed_insert(headers::AcceptRanges::bytes());
+
+    let requested_range = match &range {
+        Some(extract::TypedHeader(range)) => {
+            // we don't support multirange requests, so check if there was only one range requested
+            let mut iter = range.iter();
+            let range = iter.next();
+            if iter.next().is_none() {
+                range
+            } else {
+                None
+            }
+        }
+        None => None,
+    };
+
+    let (stdout, range) = match read_log(stream, &id, &dirs, requested_range).await {
+        Ok(stdout) => stdout,
+        Err(e) => {
+            return Err(e.into());
+        }
+    };
+
+    if let Some(range) = range {
+        let range = ContentRange::bytes(range, None).unwrap();
+        headers.typed_insert(range);
+
+        Ok((StatusCode::PARTIAL_CONTENT, headers, stdout))
+    } else {
+        Ok((StatusCode::OK, headers, stdout))
+    }
+}
+
 /// Tries to read the hook stdout
 pub async fn hook_stdout(
     id: extract::Path<Uuid>,
     dirs: extract::Extension<ProjectDirs>,
-) -> Result<String, StatusCode> {
-    match read_log("stdout", &id, &dirs).await {
-        Ok(stdout) => Ok(stdout),
-        Err(e) => Err(e.into()),
-    }
+    range: Option<extract::TypedHeader<Range>>,
+) -> Result<(StatusCode, HeaderMap, String), StatusCode> {
+    hook("stdout", id, dirs, range).await
 }
 
 /// Tries to read the hook stderr
 pub async fn hook_stderr(
     id: extract::Path<Uuid>,
     dirs: extract::Extension<ProjectDirs>,
-) -> Result<String, StatusCode> {
-    match read_log("stderr", &id, &dirs).await {
-        Ok(stderr) => Ok(stderr),
-        Err(e) => Err(e.into()),
-    }
+    range: Option<extract::TypedHeader<Range>>,
+) -> Result<(StatusCode, HeaderMap, String), StatusCode> {
+    hook("stderr", id, dirs, range).await
 }
 
 /// Starts a hook and returns it's ID
