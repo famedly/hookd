@@ -10,8 +10,6 @@ license = "AGPL-3.0-only"
 keywords = ["webhook"]
 
 [dependencies]
-actix-http = "=3.0.0-beta.8"
-actix-web = "=4.0.0-beta.8"
 anyhow = "1"
 chrono = { version = "0.4", features = ["serde"] }
 directories-next = "2"
@@ -22,5 +20,8 @@ serde_json = "1"
 serde_yaml = "0.8"
 substring = "1"
 thiserror = "1"
-tokio = { version = "1", features = ["rt-multi-thread", "macros", "process", "fs"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "process", "fs", "io-util"] }
 uuid = { version = "0.8", features = ["serde", "v4"], default-features = false }
+axum = "0.2"
+http = "0.2"
+hyper = "0.14"

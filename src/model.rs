@@ -1,7 +1,10 @@
 //! Module containing struct definitions for responses.
-use std::{collections::HashMap, net::SocketAddr};
+use std::collections::HashMap;
 
-use actix_http::RequestHead;
+use axum::{
+    async_trait,
+    extract::{FromRequest, RequestParts},
+};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
@@ -52,24 +55,27 @@ pub struct Request {
     pub version: String,
     /// HTTP headers passed in the request
     pub headers: HashMap<String, String>,
-    /// IP Address of the peer that made the request
-    pub peer_addr: Option<SocketAddr>,
 }
 
-impl From<&RequestHead> for Request {
-    fn from(rh: &RequestHead) -> Self {
+#[async_trait]
+impl FromRequest for Request {
+    type Rejection = ();
+
+    async fn from_request(req: &mut RequestParts<hyper::Body>) -> Result<Self, Self::Rejection> {
         let mut headers = HashMap::new();
-        for (key, val) in rh.headers.iter() {
-            if let (key, Ok(val)) = (key.to_string(), val.to_str()) {
-                headers.insert(key, format!("{}", val));
+        if let Some(map) = req.headers() {
+            for (key, val) in map.iter() {
+                if let (key, Ok(val)) = (key.to_string(), val.to_str()) {
+                    headers.insert(key, val.to_string());
+                }
             }
         }
-        Self {
-            uri: rh.uri.to_string(),
-            method: rh.method.to_string(),
-            version: format!("{:?}", rh.version),
+
+        Ok(Self {
+            uri: req.uri().to_string(),
+            method: req.method().to_string(),
+            version: format!("{:?}", req.version()),
             headers,
-            peer_addr: rh.peer_addr,
-        }
+        })
     }
 }

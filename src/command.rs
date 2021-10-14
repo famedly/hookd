@@ -1,7 +1,6 @@
 //! Module with fuctionality for spawning hooks and handling their IO
 use std::{io::SeekFrom, path::PathBuf, process::Stdio};
 
-use actix_web::HttpRequest;
 use anyhow::Context;
 use chrono::Utc;
 use directories_next::ProjectDirs;
@@ -16,19 +15,19 @@ use crate::{
     config::Config,
     error::ApiError,
     file::{get_hook_files, write_initial_hook_info, write_stream_to_file},
-    model::{CreateConfig, Info},
+    model::{CreateConfig, Info, Request},
 };
 
 /// Runs a hook with the given configuration
 pub async fn run_hook(
     config: &Config,
-    req: HttpRequest,
+    req: Request,
     dirs: &ProjectDirs,
     mut create_config: CreateConfig,
     name: String,
 ) -> Result<Uuid, ApiError> {
     let id = Uuid::new_v4();
-    let (info_path, log_path) = get_hook_files(&dirs, &id, true)
+    let (info_path, log_path) = get_hook_files(dirs, &id, true)
         .await
         .context("Couldn't get hook directory")?;
     let static_config = config
@@ -36,7 +35,7 @@ pub async fn run_hook(
         .get(&name)
         .ok_or(ApiError::NotFound("No hook with this name configured"))?;
     create_config.filter(&static_config.allowed_keys);
-    write_initial_hook_info(&static_config, req, info_path.clone())
+    write_initial_hook_info(static_config, req, info_path.clone())
         .await
         .context("Couldn't write hook info")?;
     let mut command = Command::new(&static_config.command);
@@ -47,7 +46,7 @@ pub async fn run_hook(
         command.env(key, val);
     }
     let child = command.spawn().context("Couldn't spawn hook command")?;
-    handle_instance(child, log_path, info_path, id.clone()).await?;
+    handle_instance(child, log_path, info_path, id).await?;
     Ok(id)
 }
 
@@ -63,7 +62,7 @@ pub async fn handle_instance(
 ) -> Result<(), ApiError> {
     let mut stdout_path = log_path.clone();
     stdout_path.push("stdout.txt");
-    let mut stderr_path = log_path.clone();
+    let mut stderr_path = log_path;
     stderr_path.push("stderr.txt");
     let stdout = instance
         .stdout
@@ -75,11 +74,7 @@ pub async fn handle_instance(
         .context(format!("Couldn't take stderr of instance {}", id))?;
     tokio::spawn(write_stream_to_file(stdout, stdout_path));
     tokio::spawn(write_stream_to_file(stderr, stderr_path));
-    tokio::spawn(update_hook_info_upon_completion(
-        instance,
-        info_path,
-        id.clone(),
-    ));
+    tokio::spawn(update_hook_info_upon_completion(instance, info_path, id));
     Ok(())
 }
 

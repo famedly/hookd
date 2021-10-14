@@ -1,4 +1,4 @@
-use actix_web::HttpResponse;
+use http::StatusCode;
 use thiserror::Error;
 
 /// Error for describing why a request failed
@@ -12,7 +12,7 @@ pub enum ApiError {
     NotFound(&'static str),
 }
 
-impl From<ApiError> for HttpResponse {
+impl From<ApiError> for StatusCode {
     fn from(e: ApiError) -> Self {
         match e {
             ApiError::InternalServerError(e) => {
@@ -21,11 +21,11 @@ impl From<ApiError> for HttpResponse {
                     e,
                     e.root_cause()
                 );
-                HttpResponse::InternalServerError().into()
+                StatusCode::INTERNAL_SERVER_ERROR
             }
             ApiError::NotFound(e) => {
                 log::debug!("Resource not found! See: {}", e);
-                HttpResponse::NotFound().into()
+                StatusCode::NOT_FOUND
             }
         }
     }
