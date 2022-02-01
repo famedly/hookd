@@ -58,7 +58,7 @@ pub struct Request {
 }
 
 #[async_trait]
-impl FromRequest for Request {
+impl FromRequest<hyper::Body> for Request {
     type Rejection = ();
 
     async fn from_request(req: &mut RequestParts<hyper::Body>) -> Result<Self, Self::Rejection> {
