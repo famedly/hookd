@@ -5,6 +5,7 @@ use chrono::Utc;
 use fern::Dispatch;
 use log::{info, LevelFilter};
 
+#[allow(clippy::print_stderr)]
 /// Sets up logging with `fern`
 pub(crate) fn setup(level: LevelFilter) {
 	match Dispatch::new()
@@ -14,7 +15,7 @@ pub(crate) fn setup(level: LevelFilter) {
 				Utc::now().format("%Y-%m-%d %H:%M:%S"),
 				record.level(),
 				message
-			))
+			));
 		})
 		.level(level)
 		.chain(stdout())

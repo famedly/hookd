@@ -43,7 +43,7 @@ pub async fn run_hook(
 		command.env(key, val);
 	}
 	let child = command.spawn().context("Couldn't spawn hook command")?;
-	handle_instance(child, log_path, info_path, id).await?;
+	handle_instance(child, log_path, info_path, id)?;
 	Ok(id)
 }
 
@@ -52,7 +52,7 @@ pub async fn run_hook(
 /// This includes capturing the output streams and writing them to files, as
 /// well as waiting for the child process to exit and writing whether it
 /// succeeded and when it finished to the info file
-pub async fn handle_instance(
+pub fn handle_instance(
 	mut instance: Child,
 	log_path: PathBuf,
 	info_path: PathBuf,

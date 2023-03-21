@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use tokio::{fs::File, io::AsyncReadExt};
 
 /// Service configuration
-#[derive(Deserialize, Clone)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct Config {
 	/// Map from hook name to hook config
 	pub hooks: HashMap<String, Hook>,
@@ -19,7 +19,7 @@ pub struct Config {
 }
 
 /// Configuration for a specific hook
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Hook {
 	/// Command to execute in the hook
 	pub command: String,

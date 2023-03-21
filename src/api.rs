@@ -11,6 +11,8 @@ use crate::{
 	model::{CreateConfig, Info, Request},
 };
 
+// False positive
+#[allow(clippy::unused_async)]
 /// Always returns 200 OK, for health checking by proxies
 pub async fn health_check() -> StatusCode {
 	StatusCode::OK
@@ -51,7 +53,7 @@ pub async fn hook_stderr(
 
 /// Starts a hook and returns it's ID
 pub async fn start_hook(
-	create_config: extract::Json<CreateConfig>,
+	create_config: Json<CreateConfig>,
 	path: extract::Path<String>,
 	config: extract::Extension<Config>,
 	dirs: extract::Extension<ProjectDirs>,

@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 use crate::config::Hook;
 
 /// Configuration for running a hook that's passed when creating a hook instance
-#[derive(Deserialize, Clone)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct CreateConfig {
 	/// Map of environment variables passed to the hook when executed. These
 	/// will be filtered down to the allowed set configured for the hook before
@@ -28,7 +28,7 @@ impl CreateConfig {
 }
 
 /// Info about a hook instance
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Info {
 	/// Request parameters of the http request that started this hook instance
 	pub request: Request,
@@ -47,7 +47,7 @@ pub struct Info {
 }
 
 /// Request parameters of a hook instance spawning request
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Request {
 	/// URI used for the request
 	pub uri: String,
@@ -68,7 +68,7 @@ impl FromRequest for Request {
 		if let Some(map) = req.headers() {
 			for (key, val) in map.iter() {
 				if let (key, Ok(val)) = (key.to_string(), val.to_str()) {
-					headers.insert(key, val.to_string());
+					headers.insert(key, val.to_owned());
 				}
 			}
 		}
