@@ -1,6 +1,6 @@
 include:
   - project: 'famedly/infra/templates/ci-cd'
-    ref: rust-v1
+    ref: 'rust-v1'
     file: '/rust.yml'
   - project: 'famedly/infra/templates/ci-cd'
     ref: 'docker-v1'
@@ -12,6 +12,7 @@ stages:
   - build
   - upload
   - release
+  - deploy
 
 variables:
   PACKAGE_REGISTRY_URL: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/hookd
@@ -45,3 +46,12 @@ release:
       --assets-link "{\"name\":\"${LINUX_AMD64_BINARY}-${CI_COMMIT_TAG}\",\"url\":\"${PACKAGE_REGISTRY_URL}/${CI_COMMIT_TAG}/${LINUX_AMD64_BINARY}-${CI_COMMIT_TAG}\"}"
   rules:
     - if: '$CI_COMMIT_TAG && $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+
+docker-releases:
+  extends: .docker_releases
+
+docker-tags:
+  extends: .docker_tags
+
+docker-branches:
+  extends: .docker_branches
