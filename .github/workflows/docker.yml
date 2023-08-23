@@ -11,3 +11,4 @@ jobs:
     secrets: inherit
     with:
       name: hookd
+      registry: docker-oss.nexus.famedly.de
