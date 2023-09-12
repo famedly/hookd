@@ -7,7 +7,7 @@ use log::{info, LevelFilter};
 
 #[allow(clippy::print_stderr)]
 /// Sets up logging with `fern`
-pub(crate) fn setup(level: LevelFilter) {
+pub fn setup(level: LevelFilter) {
 	match Dispatch::new()
 		.format(|out, message, record| {
 			out.finish(format_args!(
