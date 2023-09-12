@@ -94,7 +94,7 @@ where
 	Ok(())
 }
 
-/// Helper fuction that writes the hook info after the hook has been spawned
+/// Helper function that writes the hook info after the hook has been spawned
 pub async fn write_initial_hook_info(
 	hook: &Hook,
 	request: Request,

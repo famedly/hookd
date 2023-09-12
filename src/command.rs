@@ -1,4 +1,4 @@
-//! Module with fuctionality for spawning hooks and handling their IO
+//! Module with functionality for spawning hooks and handling their IO
 use std::{io::SeekFrom, path::PathBuf, process::Stdio};
 
 use anyhow::Context;
