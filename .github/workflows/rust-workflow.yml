@@ -13,4 +13,8 @@ concurrency:
 
 jobs:
   check:
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: read
     uses: famedly/backend-build-workflows/.github/workflows/rust-workflow.yml@main
