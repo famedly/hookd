@@ -61,7 +61,7 @@ pub async fn get_hook_files(
 	create: bool,
 ) -> Result<(PathBuf, PathBuf), ApiError> {
 	let mut data_dir = dirs.data_dir().to_path_buf();
-	let id_string = id.to_hyphenated().to_string();
+	let id_string = id.hyphenated().to_string();
 	for i in 0..4 {
 		data_dir.push(id_string.substring(2 * i, 2 * i + 2));
 	}

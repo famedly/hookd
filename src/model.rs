@@ -1,11 +1,9 @@
 //! Module containing struct definitions for responses.
 use std::collections::HashMap;
 
-use axum::{
-	async_trait,
-	extract::{FromRequest, RequestParts},
-};
+use axum::{async_trait, extract::FromRequestParts};
 use chrono::{DateTime, Utc};
+use http::request::Parts;
 use serde::{Deserialize, Serialize};
 
 use crate::config::Hook;
@@ -60,23 +58,21 @@ pub struct Request {
 }
 
 #[async_trait]
-impl FromRequest for Request {
+impl<S> FromRequestParts<S> for Request {
 	type Rejection = ();
 
-	async fn from_request(req: &mut RequestParts<hyper::Body>) -> Result<Self, Self::Rejection> {
+	async fn from_request_parts(req: &mut Parts, _: &S) -> Result<Self, Self::Rejection> {
 		let mut headers = HashMap::new();
-		if let Some(map) = req.headers() {
-			for (key, val) in map.iter() {
-				if let (key, Ok(val)) = (key.to_string(), val.to_str()) {
-					headers.insert(key, val.to_owned());
-				}
+		for (key, val) in req.headers.iter() {
+			if let (key, Ok(val)) = (key.to_string(), val.to_str()) {
+				headers.insert(key, val.to_owned());
 			}
 		}
 
 		Ok(Self {
-			uri: req.uri().to_string(),
-			method: req.method().to_string(),
-			version: format!("{:?}", req.version()),
+			uri: req.uri.to_string(),
+			method: req.method.to_string(),
+			version: format!("{:?}", req.version),
 			headers,
 		})
 	}

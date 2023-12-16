@@ -12,28 +12,30 @@ pub mod model;
 use anyhow::Result;
 use api::{health_check, hook_status, hook_stderr, hook_stdout, start_hook};
 use axum::{
-	handler::{get, post},
-	AddExtensionLayer, Router,
+	routing::{get, post},
+	Extension, Router,
 };
 use config::Config;
 use directories_next::ProjectDirs;
 pub use error::ApiError;
+use tokio::net::TcpListener;
 
 /// Main function that sets up logging and starts the API server.
 pub async fn run(dirs: ProjectDirs, config: Config) -> Result<()> {
-	axum::Server::bind(&config.address)
-		.serve(
-			Router::new()
-				.route("/health", get(health_check))
-				.route("/hook/:name", post(start_hook))
-				.route("/status/:id", get(hook_status))
-				.route("/status/:id/stdout", get(hook_stdout))
-				.route("/status/:id/stderr", get(hook_stderr))
-				.layer(AddExtensionLayer::new(dirs))
-				.layer(AddExtensionLayer::new(config))
-				.into_make_service(),
-		)
-		.await?;
+	let listener = TcpListener::bind(&config.address).await?;
+	axum::serve(
+		listener,
+		Router::new()
+			.route("/health", get(health_check))
+			.route("/hook/:name", post(start_hook))
+			.route("/status/:id", get(hook_status))
+			.route("/status/:id/stdout", get(hook_stdout))
+			.route("/status/:id/stderr", get(hook_stderr))
+			.layer(Extension(dirs))
+			.layer(Extension(config))
+			.into_make_service(),
+	)
+	.await?;
 
 	Ok(())
 }
