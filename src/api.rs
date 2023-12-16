@@ -53,16 +53,16 @@ pub async fn hook_stderr(
 
 /// Starts a hook and returns it's ID
 pub async fn start_hook(
-	create_config: Json<CreateConfig>,
 	path: extract::Path<String>,
 	config: extract::Extension<Config>,
 	dirs: extract::Extension<ProjectDirs>,
 	req: Request,
+	create_config: Json<CreateConfig>,
 ) -> Result<String, StatusCode> {
 	let name: String = path.0;
 	let create_config = create_config.0.clone();
 	match run_hook(&config, req, &dirs, create_config, name).await {
-		Ok(id) => Ok(id.to_hyphenated().to_string()),
+		Ok(id) => Ok(id.hyphenated().to_string()),
 		Err(e) => Err(e.into()),
 	}
 }
