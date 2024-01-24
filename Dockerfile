@@ -15,9 +15,29 @@ WORKDIR /app
 RUN cargo auditable build --release
 
 FROM debian:bullseye-slim
-RUN apt update && apt install -y ca-certificates
-RUN mkdir -p /opt/hookd
+
+RUN apt-get update -qq -o Acquire::Languages=none && \
+    env DEBIAN_FRONTEND=noninteractive apt-get install \
+    -yqq \
+# install...
+        ca-certificates \
+        tzdata \
+        curl && \
+# clean up...
+    rm -rf /var/lib/apt/lists/* && \
+# create working directory
+    mkdir -p /opt/hookd && \
+# ensure the UTC timezone is set
+    ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime
+
 WORKDIR /opt/hookd
 COPY --from=builder /app/target/release/hookd /usr/local/bin/hookd
 CMD ["/usr/local/bin/hookd"]
 
+ENV TZ=Etc/UTC
+# This port number should match the number set in `config.sample.yaml`
+ARG service_port_number=9320
+EXPOSE ${service_port_number}/tcp
+ENV SERVICE_PORT=${service_port_number}
+HEALTHCHECK --interval=3s --timeout=3s --retries=2 --start-period=5s \
+ CMD curl -fSs http://localhost:$SERVICE_PORT/health || exit 1

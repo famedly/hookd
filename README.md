@@ -17,6 +17,17 @@ cargo install hookd
 
 Create a config file in `~/.config/hookd/config.yaml` based on the `config.sample.yaml` in this repo.
 
+### Healthcheck for Docker container
+The service API implements the `/health` check for the Docker containers.
+
+*IMPORTANT*: In order the Docker container to be able to perform the check, the image MUST provide the `curl` tool. If changing or updating the base image's version, please ensure the `curl` availability!
+
+````BASH
+curl -s http://localhost:9320/health || exit 1
+````
+
+S. [Dockerfile](./Dockerfile) for details.
+
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
