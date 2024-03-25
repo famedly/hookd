@@ -9,6 +9,50 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [conventional commits]: https://www.conventionalcommits.org/en/v1.0.0/
 
+## [0.2.0] - 2024-03-25
+
+### 🚀 Features
+
+- Build release builds with cargo-auditable
+
+### 🐛 Bug Fixes
+
+- Fix ci pipeline
+- Update Dockerfile
+- Use public docker registry
+
+### 🚜 Refactor
+
+- Move run function to lib
+
+### 📚 Documentation
+
+- Set health check and time zone
+- Generate changelog using git-cliff
+- Update changelog template
+
+### ⚙️ Miscellaneous Tasks
+
+- Switch from actix to axum
+- *(bot)* Update files from template
+- Update template path
+- Appease linter
+- Add codeowners
+- Add Dockerfile and ci jobs
+- Add github action
+- Add docker CI
+- Add rust job
+- Update CODEOWNERS to github structure
+- Fix typos
+- Fix permissions for coverage in dependabot PRs
+- Update to new reusable workflow
+- Bump dependencies
+- Add CI for static release builds
+- Fix clippy lints
+- Bump dependencies
+- Bump version to 0.2.0
+
+
 ## [0.1.3] - 2021-07-08
 
 ### 🚀 Features
