@@ -8,7 +8,7 @@ use log::{info, LevelFilter};
 #[allow(clippy::print_stderr)]
 /// Sets up logging with `fern`
 pub fn setup(level: LevelFilter) {
-	match Dispatch::new()
+	let dispatch = Dispatch::new()
 		.format(|out, message, record| {
 			out.finish(format_args!(
 				"[{}][{}] {}",
@@ -18,9 +18,8 @@ pub fn setup(level: LevelFilter) {
 			));
 		})
 		.level(level)
-		.chain(stdout())
-		.apply()
-	{
+		.chain(stdout());
+	match dispatch.apply() {
 		Err(e) => {
 			eprintln!("error setting up logging: {}", e);
 		}
