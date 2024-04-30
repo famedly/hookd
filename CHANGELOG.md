@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 ### ⚙️ Miscellaneous Tasks
 
 - Add post-commit hook for changelog generation
+- Bump dependencies
 
 
 ## [0.2.0] - 2024-03-25
