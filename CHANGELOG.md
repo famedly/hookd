@@ -17,6 +17,10 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 - [**breaking**] Add configurable hook timeout
 
+### 📚 Documentation
+
+- Update repo URL
+
 ### ⚙️ Miscellaneous Tasks
 
 - Add post-commit hook for changelog generation

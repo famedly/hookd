@@ -5,7 +5,7 @@ authors = ["Jan Christian Grünhage <jan.christian@gruenhage.xyz>"]
 edition = "2018"
 description = "A simple webhook daemon that supports multiple hooks, passing env vars and reading stdout/stderr."
 readme = "README.md"
-repository = "https://gitlab.com/famedly/devops/services/hookd"
+repository = "https://github.com/famedly/hookd"
 license = "AGPL-3.0-only"
 keywords = ["webhook"]
 
