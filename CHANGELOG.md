@@ -25,6 +25,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 - Add post-commit hook for changelog generation
 - Bump dependencies
+- Bump version to 1.0.0
 
 
 ## [0.2.0] - 2024-03-25
