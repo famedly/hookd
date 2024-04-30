@@ -9,6 +9,13 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [conventional commits]: https://www.conventionalcommits.org/en/v1.0.0/
 
+## [0.2.1] - 2024-04-30
+
+### ⚙️ Miscellaneous Tasks
+
+- Add post-commit hook for changelog generation
+
+
 ## [0.2.0] - 2024-03-25
 
 ### 🚀 Features

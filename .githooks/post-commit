@@ -1,0 +1,5 @@
+#!/bin/bash
+git cliff --bump > CHANGELOG.md
+if ! git diff --quiet -- CHANGELOG.md; then
+	git commit --amend --no-edit --quiet CHANGELOG.md
+fi
