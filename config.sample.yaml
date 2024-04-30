@@ -7,3 +7,4 @@ hooks:
     allowed_keys:
       - "SOME_HOOK_VAR"
       - "SOME_OTHER_VAR"
+    timeout: "1h"

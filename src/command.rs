@@ -1,5 +1,5 @@
 //! Module with functionality for spawning hooks and handling their IO
-use std::{io::SeekFrom, path::PathBuf, process::Stdio};
+use std::{io::SeekFrom, path::PathBuf, process::Stdio, time::Duration};
 
 use anyhow::Context;
 use chrono::Utc;
@@ -8,6 +8,7 @@ use tokio::{
 	fs::OpenOptions,
 	io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt},
 	process::{Child, Command},
+	time::timeout as tokio_timeout,
 };
 use uuid::Uuid;
 
@@ -43,7 +44,7 @@ pub async fn run_hook(
 		command.env(key, val);
 	}
 	let child = command.spawn().context("Couldn't spawn hook command")?;
-	handle_instance(child, log_path, info_path, id)?;
+	handle_instance(child, log_path, info_path, id, static_config.timeout)?;
 	Ok(id)
 }
 
@@ -57,6 +58,7 @@ pub fn handle_instance(
 	log_path: PathBuf,
 	info_path: PathBuf,
 	id: Uuid,
+	timeout: Duration,
 ) -> Result<(), ApiError> {
 	let mut stdout_path = log_path.clone();
 	stdout_path.push("stdout.txt");
@@ -68,7 +70,7 @@ pub fn handle_instance(
 		instance.stderr.take().context(format!("Couldn't take stderr of instance {}", id))?;
 	tokio::spawn(write_stream_to_file(stdout, stdout_path));
 	tokio::spawn(write_stream_to_file(stderr, stderr_path));
-	tokio::spawn(update_hook_info_upon_completion(instance, info_path, id));
+	tokio::spawn(update_hook_info_upon_completion(instance, info_path, id, timeout));
 	Ok(())
 }
 
@@ -77,11 +79,24 @@ pub async fn update_hook_info_upon_completion(
 	mut instance: Child,
 	hook_info_path: PathBuf,
 	id: Uuid,
+	timeout: Duration,
 ) -> Result<(), ApiError> {
-	let status = instance
-		.wait()
-		.await
-		.context(format!("Couldn't wait for child process to exist for instance {}", id))?;
+	let child_future = instance.wait();
+	let timeout_future = tokio_timeout(timeout, child_future);
+	let status = match timeout_future.await {
+		Ok(status) => status
+			.context(format!("Couldn't wait for child process to exit for instance {}", id))?,
+		Err(_) => {
+			instance
+				.kill()
+				.await
+				.context(format!("Reached timeout but couldn't kill child for instance {}", id))?;
+			instance.wait().await.context(format!(
+				"Couldn't wait for killed child process to exit for instance {}",
+				id
+			))?
+		}
+	};
 	let now = Utc::now();
 
 	let mut info_file = OpenOptions::new()

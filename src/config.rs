@@ -1,5 +1,5 @@
 //! Module for handling the configuration of the service
-use std::{collections::HashMap, net::SocketAddr};
+use std::{collections::HashMap, net::SocketAddr, time::Duration};
 
 use anyhow::Result;
 use directories_next::ProjectDirs;
@@ -27,6 +27,9 @@ pub struct Hook {
 	pub work_dir: String,
 	/// Allowed env var keys for including in the hook
 	pub allowed_keys: Vec<String>,
+	/// Timeout for hook execution
+	#[serde(with = "humantime_serde")]
+	pub timeout: Duration,
 }
 
 /// Tries to load the service config
