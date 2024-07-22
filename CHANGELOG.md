@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 - Bump runtime image to bookworm
 - Bump dependencies
+- Bump version to 1.1.0
 
 
 ## [1.0.0] - 2024-04-30
