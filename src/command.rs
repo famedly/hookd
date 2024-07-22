@@ -33,7 +33,7 @@ pub async fn run_hook(
 	let static_config =
 		config.hooks.get(&name).ok_or(ApiError::NotFound("No hook with this name configured"))?;
 	create_config.filter(&static_config.allowed_keys);
-	write_initial_hook_info(static_config, req, info_path.clone())
+	write_initial_hook_info(static_config, &create_config.vars, req, info_path.clone())
 		.await
 		.context("Couldn't write hook info")?;
 	let mut command = Command::new(&static_config.command);

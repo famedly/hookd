@@ -1,5 +1,5 @@
 //! Module that provides methods for handling file I/O related to running hooks
-use std::path::PathBuf;
+use std::{collections::HashMap, path::PathBuf};
 
 use anyhow::Context;
 use chrono::Utc;
@@ -97,6 +97,7 @@ where
 /// Helper function that writes the hook info after the hook has been spawned
 pub async fn write_initial_hook_info(
 	hook: &Hook,
+	vars: &HashMap<String, String>,
 	request: Request,
 	file: PathBuf,
 ) -> Result<(), ApiError> {
@@ -104,6 +105,7 @@ pub async fn write_initial_hook_info(
 	let info = Info {
 		request,
 		config: hook.clone(),
+		vars: Some(vars.clone()),
 		running: true,
 		success: None,
 		started,

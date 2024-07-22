@@ -9,6 +9,17 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [conventional commits]: https://www.conventionalcommits.org/en/v1.0.0/
 
+## [1.1.0] - 2024-07-22
+
+### 🚀 Features
+
+- Store variables from invocation and return with status
+
+### ⚙️ Miscellaneous Tasks
+
+- Bump runtime image to bookworm
+
+
 ## [1.0.0] - 2024-04-30
 ### Breaking changes
  - Add configurable hook timeout

@@ -32,6 +32,8 @@ pub struct Info {
 	pub request: Request,
 	/// Configuration for this hook as provided in the config
 	pub config: Hook,
+	/// Variables provided during hook invocation
+	pub vars: Option<HashMap<String, String>>,
 	/// Whether the hook instance is still running
 	pub running: bool,
 	/// Time when the hook instance was started, UTC
