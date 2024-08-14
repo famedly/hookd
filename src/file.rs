@@ -7,7 +7,7 @@ use directories_next::ProjectDirs;
 use serde_json::to_string_pretty as json_pretty_string;
 use substring::Substring;
 use tokio::{
-	fs::{create_dir_all, read_to_string, write, File},
+	fs::{read_to_string, write, File},
 	io::{copy, AsyncRead},
 };
 use uuid::Uuid;
@@ -20,7 +20,7 @@ use crate::{
 
 /// Reads the stdout or stderr stream of a hook instance
 pub async fn read_log(stream: &str, id: &Uuid, dirs: &ProjectDirs) -> Result<String, ApiError> {
-	let (_, mut log_path) = get_hook_files(dirs, id, false).await?;
+	let mut log_path = get_log_dir(get_hook_data_dir(dirs, id));
 	ensure_file_exists(log_path.clone(), "No hook with the matching ID was found")?;
 	log_path.push(format!("{}.txt", stream));
 	ensure_file_exists(
@@ -35,7 +35,7 @@ pub async fn read_log(stream: &str, id: &Uuid, dirs: &ProjectDirs) -> Result<Str
 
 /// Reads the current hook status
 pub async fn read_status(id: &Uuid, dirs: &ProjectDirs) -> Result<Info, ApiError> {
-	let (info_path, _) = get_hook_files(dirs, id, false).await?;
+	let info_path = get_info_file(get_hook_data_dir(dirs, id));
 	ensure_file_exists(info_path.clone(), "No hook with the matching ID was found")?;
 	let info_string = read_to_string(info_path).await.context("Couldn't read hook info")?;
 	let info: Info = serde_json::from_str(&info_string)
@@ -55,28 +55,32 @@ pub fn ensure_file_exists(path: PathBuf, error: &'static str) -> Result<(), ApiE
 
 /// Function for returning the info file path and the log directory of a given
 /// hook
-pub async fn get_hook_files(
-	dirs: &ProjectDirs,
-	id: &Uuid,
-	create: bool,
-) -> Result<(PathBuf, PathBuf), ApiError> {
+pub fn get_hook_data_dir(dirs: &ProjectDirs, id: &Uuid) -> PathBuf {
 	let mut data_dir = dirs.data_dir().to_path_buf();
 	let id_string = id.hyphenated().to_string();
 	for i in 0..4 {
 		data_dir.push(id_string.substring(2 * i, 2 * i + 2));
 	}
 	data_dir.push(id_string.substring(9, id_string.len()));
-	if create {
-		create_dir_all(&data_dir).await.context("Couldn't create hook directory")?;
-	} else {
-		ensure_file_exists(data_dir.clone(), "No hook with matching ID was found")?;
-	}
-	let mut hook_info_path = data_dir.clone();
-	hook_info_path.push("info.json");
-	let mut hook_log_path = data_dir.clone();
-	hook_log_path.push("log");
-	create_dir_all(&hook_log_path).await.context("Couldn't create hook log directory")?;
-	Ok((hook_info_path, hook_log_path))
+	data_dir
+}
+
+pub fn get_log_dir<P>(data_dir: P) -> PathBuf
+where
+	P: AsRef<std::path::Path>,
+{
+	let mut log_dir = data_dir.as_ref().to_path_buf();
+	log_dir.push("log");
+	log_dir
+}
+
+pub fn get_info_file<P>(data_dir: P) -> PathBuf
+where
+	P: AsRef<std::path::Path>,
+{
+	let mut info_file = data_dir.as_ref().to_path_buf();
+	info_file.push("info.json");
+	info_file
 }
 
 /// Helper function that takes the output stream of a hook instance and writes

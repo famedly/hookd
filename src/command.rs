@@ -5,7 +5,7 @@ use anyhow::Context;
 use chrono::Utc;
 use directories_next::ProjectDirs;
 use tokio::{
-	fs::OpenOptions,
+	fs::{create_dir_all, OpenOptions},
 	io::{AsyncReadExt, AsyncSeekExt, AsyncWriteExt},
 	process::{Child, Command},
 	time::timeout as tokio_timeout,
@@ -15,7 +15,10 @@ use uuid::Uuid;
 use crate::{
 	config::Config,
 	error::ApiError,
-	file::{get_hook_files, write_initial_hook_info, write_stream_to_file},
+	file::{
+		get_hook_data_dir, get_info_file, get_log_dir, write_initial_hook_info,
+		write_stream_to_file,
+	},
 	model::{CreateConfig, Info, Request},
 };
 
@@ -28,8 +31,10 @@ pub async fn run_hook(
 	name: String,
 ) -> Result<Uuid, ApiError> {
 	let id = Uuid::new_v4();
-	let (info_path, log_path) =
-		get_hook_files(dirs, &id, true).await.context("Couldn't get hook directory")?;
+	let data_dir = get_hook_data_dir(dirs, &id);
+	let info_path = get_info_file(&data_dir);
+	let log_path = get_log_dir(&data_dir);
+	create_dir_all(&log_path).await.context("Couldn't create hook directories")?;
 	let static_config =
 		config.hooks.get(&name).ok_or(ApiError::NotFound("No hook with this name configured"))?;
 	create_config.filter(&static_config.allowed_keys);
