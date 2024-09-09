@@ -19,6 +19,10 @@ The format is based on [Keep a Changelog], and this project adheres to
 
 - Rewrite file handling
 
+### ⚙️ Miscellaneous Tasks
+
+- Update dependencies
+
 
 ## [1.1.0] - 2024-07-22
 
