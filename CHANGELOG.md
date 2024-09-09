@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog], and this project adheres to
 ### ⚙️ Miscellaneous Tasks
 
 - Update dependencies
+- Bump version to 1.2.0
 
 
 ## [1.1.0] - 2024-07-22
