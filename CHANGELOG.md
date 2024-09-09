@@ -9,7 +9,11 @@ The format is based on [Keep a Changelog], and this project adheres to
 [semantic versioning]: https://semver.org/spec/v2.0.0.html
 [conventional commits]: https://www.conventionalcommits.org/en/v1.0.0/
 
-## [1.1.1] - 2024-08-14
+## [1.2.0] - 2024-09-09
+
+### 🚀 Features
+
+- Add auxiliary data directory for allowing jobs to store additional data
 
 ### 🚜 Refactor
 

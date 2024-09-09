@@ -65,6 +65,15 @@ pub fn get_hook_data_dir(dirs: &ProjectDirs, id: &Uuid) -> PathBuf {
 	data_dir
 }
 
+pub fn get_aux_dir<P>(data_dir: P) -> PathBuf
+where
+	P: AsRef<std::path::Path>,
+{
+	let mut aux_dir = data_dir.as_ref().to_path_buf();
+	aux_dir.push("aux");
+	aux_dir
+}
+
 pub fn get_log_dir<P>(data_dir: P) -> PathBuf
 where
 	P: AsRef<std::path::Path>,

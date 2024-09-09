@@ -16,7 +16,7 @@ use crate::{
 	config::Config,
 	error::ApiError,
 	file::{
-		get_hook_data_dir, get_info_file, get_log_dir, write_initial_hook_info,
+		get_aux_dir, get_hook_data_dir, get_info_file, get_log_dir, write_initial_hook_info,
 		write_stream_to_file,
 	},
 	model::{CreateConfig, Info, Request},
@@ -34,6 +34,7 @@ pub async fn run_hook(
 	let data_dir = get_hook_data_dir(dirs, &id);
 	let info_path = get_info_file(&data_dir);
 	let log_path = get_log_dir(&data_dir);
+	let aux_path = get_aux_dir(&data_dir);
 	create_dir_all(&log_path).await.context("Couldn't create hook directories")?;
 	let static_config =
 		config.hooks.get(&name).ok_or(ApiError::NotFound("No hook with this name configured"))?;
@@ -48,6 +49,7 @@ pub async fn run_hook(
 	for (key, val) in &create_config.vars {
 		command.env(key, val);
 	}
+	command.env("HOOKD_JOB_AUX_DIR", aux_path);
 	let child = command.spawn().context("Couldn't spawn hook command")?;
 	handle_instance(child, log_path, info_path, id, static_config.timeout)?;
 	Ok(id)
