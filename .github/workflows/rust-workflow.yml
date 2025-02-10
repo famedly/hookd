@@ -18,3 +18,6 @@ jobs:
       pull-requests: write
       contents: read
     uses: famedly/backend-build-workflows/.github/workflows/rust-workflow.yml@v1
+    with:
+      # This repository doesn't currently have any tests
+      testcov_args: --no-tests=warn
